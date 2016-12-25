@@ -3,6 +3,8 @@ var fl = 0;
 var painting = [];
 var thisStroke = [];
 var isPainting = false;
+var doubleClickMS = 0;
+var doubleClick = false;
 function setup() {
 	createCanvas(640,480);
 }
@@ -39,6 +41,10 @@ function draw() {
 //requires mousepressed and released due to setting the current stroke
 
 function mousePressed() {
+	doubleClick = (floor(millis()-doubleClickMS) <= 500?true:false);
+	doubleClickMS = millis();
+	
+	if (doubleClick) painting = [];
 	thisStroke = [];
 }
 function mouseDragged() {
@@ -46,6 +52,7 @@ function mouseDragged() {
 }
 
 function mouseReleased() {
-	painting.push(thisStroke);
+	if (thisStroke.length > 1) painting.push(thisStroke);
 	thisStroke = [];
 }
+
