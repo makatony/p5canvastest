@@ -1,11 +1,14 @@
 var bgr = 0;
 var fl = 0;
 
+mouseListeners = []
+
 var painting = [];
 var thisStroke = [];
 var isPainting = false;
 var doubleClickMS = 0;
-var doubleClick = false;
+var isDoubleClick = false;
+var isMouseDrag = false;
 
 var ellipseCollisionObj = { r: 25, x: 150, y: 50 };
 
@@ -26,6 +29,34 @@ function draw() {
 	drawSpinningRectangle();
 	
 }
+
+var mousePressed = function () {
+	this.isDoubleClick = (floor(millis()-doubleClickMS) <= 500?true:false); //for some reason this.isDoubleClick is passed to the functions without problems
+	
+	mouseEventCallHandlers("mousePressed",arguments);
+	doubleClickMS = millis(); //resets doubleclick timer
+	this.isMouseDrag = false;
+
+}
+var mouseClicked = function () {
+	mouseEventCallHandlers("mouseClicked",arguments);
+	this.isMouseDrag = false;
+}
+
+var mouseReleased = function() {
+	mouseEventCallHandlers("mouseReleased",arguments);
+	this.isMouseDrag = false;
+}
+var mouseDragged = function() {
+	this.isMouseDrag = true;
+	mouseEventCallHandlers("mouseDragged",arguments);
+}
+var mouseEventCallHandlers = function (type,arguments) {
+	for (var i = 0; i < mouseListeners.length; i++) { //calls all event listeners
+		if (mouseListeners[i].type == type) mouseListeners[i].fn.apply(this, arguments);
+	}
+}
+
 
 
 
@@ -64,20 +95,18 @@ drawPainting = function () {
 	});
 }
 //requires mousepressed and released due to setting the current stroke
-mousePressed = function() {
-	doubleClick = (floor(millis()-doubleClickMS) <= 500?true:false);
-	doubleClickMS = millis();
-	
-	if (doubleClick) painting = [];
+
+mouseListeners.push({ type: "mousePressed", fn:function () {
+	if (this.isDoubleClick) painting = [];
 	thisStroke = [];
-}
-mouseDragged = function() {
+}});
+mouseListeners.push({ type: "mouseDragged", fn:function () {
 	thisStroke.push(createVector(mouseX,mouseY));
-}
-mouseReleased = function() {
+}});
+mouseListeners.push({ type: "mouseReleased", fn:function () {
 	if (thisStroke.length > 1) painting.push(thisStroke);
 	thisStroke = [];
-}
+}});
 
 
 
@@ -104,14 +133,16 @@ setupBouncingBalls = function(amount) {
 	bouncingBalls = [];
 	var amount = amount||2;
 	for (var i = 0; i < amount; i++) {
-		var ballProperties = { r: 15, pos: { x: random(0,width), y: random(0,height)}, xspeed:random(-4,4), yspeed:random(-4,4) };
-		var newBall = new BouncingBall(ballProperties);
+		var newBall = new BouncingBall({ r: 15 });
 		console.log(newBall.getConstructorName());
 		
 		bouncingBalls.push(newBall);
-		}
-	
+	}
 }
+mouseListeners.push({ type:"mouseReleased", fn:function () {
+		if (!this.isMouseDrag && !this.isDoubleClick)
+			setTimeout(function() { if (millis()-doubleClickMS > 100) bouncingBalls.push(new BouncingBall({ r: 15,pos: { x: mouseX, y: mouseY } }))},100);
+}});
 drawBouncingBalls = function() {
 	for (var i = 0; i < bouncingBalls.length; i++) {
 		bouncingBalls[i].update();
@@ -121,9 +152,9 @@ drawBouncingBalls = function() {
 function BouncingBall(ball) { //difference between this and returning ballobj is that this is of constructor=BouncingBall and ballobj is of constructor=object
 	this.r = ball.r||10;
 	this.pos = ball.pos||{};
-	this.pos = { x: this.pos.x||10, y: this.pos.y||10 };
-	this.xspeed = ball.xspeed||4;
-	this.yspeed = ball.yspeed||1;
+	this.pos = { x: this.pos.x||random(0,width), y: this.pos.y||random(0,height) };
+	this.xspeed = ball.xspeed||random(-4,4);
+	this.yspeed = ball.yspeed||random(-4,4);
 		
 	this.getConstructorName = function() { return this.constructor.name };
 	
@@ -145,6 +176,8 @@ function BouncingBall(ball) { //difference between this and returning ballobj is
 
 	return this; // optional
 }
+
+
 
 
 // ############################
