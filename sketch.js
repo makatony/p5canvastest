@@ -16,6 +16,8 @@ function draw() {
 	ellipse(mouseX,height/2,40,40);
 	
 	noStroke();
+	
+	//fills in all previous strokes
 	painting.forEach(function (stroke) {
 		stroke.forEach (function (point) {
 			fl = map(stroke[0].x,0,height,255,0); // color of the fill is based on where the stroke started, i.e. stroke[0])
@@ -24,6 +26,7 @@ function draw() {
 		});
 	});
 	
+	//fills in current stroke because it is not yet in paiting variable
 	thisStroke.forEach (function (point) {
 		fl = map(thisStroke[0].x,0,height,255,0); // color of the fill is based on where the stroke started, i.e. stroke[0])
 		fill(fl);
@@ -36,17 +39,13 @@ function draw() {
 //requires mousepressed and released due to setting the current stroke
 
 function mousePressed() {
-	isPainting = true;
 	thisStroke = [];
 }
 function mouseDragged() {
-	if (isPainting) {
 		thisStroke.push(createVector(mouseX,mouseY));
-	}
 }
 
 function mouseReleased() {
 	painting.push(thisStroke);
-	isPainting = false;
 	thisStroke = [];
 }
