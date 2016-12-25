@@ -4,9 +4,6 @@ var fl = 0;
 var painting = [];
 var thisStroke = [];
 var isPainting = false;
-var doubleClickMS = 0;
-var isDoubleClick = false;
-var isMouseDrag = false;
 
 var ellipseCollisionObj = { r: 25, x: 150, y: 50 };
 
@@ -33,6 +30,9 @@ function draw() {
 // #### UTIL: MOUSE EVENTS ####
 // ############################
 
+var doubleClickMS = 0;
+var isDoubleClick = false;
+var isMouseDrag = false;
 mouseListeners = [];
 var mousePressed = function () {
 	this.isDoubleClick = (floor(millis()-doubleClickMS) <= 500?true:false); //for some reason this.isDoubleClick is passed to the functions without problems
