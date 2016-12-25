@@ -1,8 +1,6 @@
 var bgr = 0;
 var fl = 0;
 
-mouseListeners = []
-
 var painting = [];
 var thisStroke = [];
 var isPainting = false;
@@ -15,6 +13,7 @@ var ellipseCollisionObj = { r: 25, x: 150, y: 50 };
 function setup() {
 	createCanvas(640,480);
 	
+	setupSpringCircle();
 	setupBouncingBalls(2);
 }
 
@@ -27,35 +26,25 @@ function draw() {
 	drawEllipseCollision();
 	drawBouncingBalls();
 	drawSpinningRectangle();
-	
 }
 
+
+// ############################
+// #### UTIL: MOUSE EVENTS ####
+// ############################
+
+mouseListeners = [];
 var mousePressed = function () {
 	this.isDoubleClick = (floor(millis()-doubleClickMS) <= 500?true:false); //for some reason this.isDoubleClick is passed to the functions without problems
+	doubleClickMS = millis(); //resets doubleclick timer
 	
 	mouseEventCallHandlers("mousePressed",arguments);
-	doubleClickMS = millis(); //resets doubleclick timer
-	this.isMouseDrag = false;
-
-}
-var mouseClicked = function () {
-	mouseEventCallHandlers("mouseClicked",arguments);
 	this.isMouseDrag = false;
 }
-
-var mouseReleased = function() {
-	mouseEventCallHandlers("mouseReleased",arguments);
-	this.isMouseDrag = false;
-}
-var mouseDragged = function() {
-	this.isMouseDrag = true;
-	mouseEventCallHandlers("mouseDragged",arguments);
-}
-var mouseEventCallHandlers = function (type,arguments) {
-	for (var i = 0; i < mouseListeners.length; i++) { //calls all event listeners
-		if (mouseListeners[i].type == type) mouseListeners[i].fn.apply(this, arguments);
-	}
-}
+var mouseClicked = function () { mouseEventCallHandlers("mouseClicked",arguments); this.isMouseDrag = false; }
+var mouseReleased = function() { mouseEventCallHandlers("mouseReleased",arguments); this.isMouseDrag = false; }
+var mouseDragged = function() {	this.isMouseDrag = true; mouseEventCallHandlers("mouseDragged",arguments); }
+var mouseEventCallHandlers = function (type,arguments) { mouseListeners.forEach(function (elt) { if (elt.type == type) elt.fn.apply(this, arguments); } ); }
 
 
 
@@ -64,13 +53,44 @@ var mouseEventCallHandlers = function (type,arguments) {
 // ####################
 // #### BACKGROUND ####
 // ####################
+setupSpringCircle = function () {
+	springStrength = 0.025;
+	springDrag = 0.85;
+	
+	springTarget = 0;
+	springVel = 0;
+	springPos = 0; //x position of circle
+}
+
 drawBackground = function () {
-	bgr = map(mouseX,0,height,0,255);
+	springTarget = mouseX;
+	
+	var springForce = springTarget - springPos; // if current position of circle relative to mouseX is great, the force is strong as well
+	
+	springForce *= springStrength; //scaling force (force will be going down by 90% on each draw)
+	springVel *= springDrag; // scaling velocity (velocity will go down by 25% due to drag on each frame)
+	
+	springVel += springForce;
+	
+	springPos += springVel; // velocity might make the x position overshoot the mousex
+	
+	
+	
+	
+	
+	
+	
+	
+	bgr = map(springPos,0,height,0,255);
 	background(bgr);
 	
 	fl = map(bgr,0,255,255,0); //inverts grayscale from 0-255 to 255-0
 	fill(fl);
-	ellipse(mouseX,height/2,40,40);
+	
+	
+	
+	
+	ellipse(springPos,height/2,40,40);
 }
 
 
