@@ -42,24 +42,24 @@ var mousePressed = function() {
   this.isDoubleClick = (floor(millis() - doubleClickMS) <= 500 ? true : false); //for some reason this.isDoubleClick is passed to the functions without problems
   doubleClickMS = millis(); //resets doubleclick timer
 
-  mouseEventCallHandlers('mousePressed', args);
+  mouseEventCallHandlers('mousePressed', arguments);
   this.isMouseDrag = false;
 };
 var mouseClicked = function() {
-  mouseEventCallHandlers('mouseClicked', args);
+  mouseEventCallHandlers('mouseClicked', arguments);
   this.isMouseDrag = false;
 };
 var mouseReleased = function() {
-  mouseEventCallHandlers('mouseReleased', args);
+  mouseEventCallHandlers('mouseReleased', arguments);
   this.isMouseDrag = false;
 };
 var mouseDragged = function() {
   this.isMouseDrag = true;
-  mouseEventCallHandlers('mouseDragged', args);
+  mouseEventCallHandlers('mouseDragged', arguments);
 };
-var mouseEventCallHandlers = function(type, args) {
+var mouseEventCallHandlers = function(type, arguments) {
   mouseListeners.forEach(function(elt) {
-    if (elt.type == type) elt.fn.apply(this, args);
+    if (elt.type == type) elt.fn.apply(this, arguments);
   });
 };
 
